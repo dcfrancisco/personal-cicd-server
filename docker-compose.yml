@@ -1,0 +1,29 @@
+version: "3.9"
+services:
+  jenkins:
+    build:
+      context: ./jenkins
+    container_name: jenkins-instance
+    ports:
+      - "8080:8080"
+    volumes:
+      - jenkins-data:/var/jenkins_home
+   
+  nexus:
+    build:
+      context: ./nexus
+    container_name: nexus-instance
+    expose:
+      - 8081
+      - 8082
+      - 8083
+    ports:
+      - "8082:8082"
+      - "8083:8083"
+      - "8081:8081"
+    volumes:
+      - ./volume:/nexus-data
+    restart: always
+
+volumes:
+  jenkins-data:
