@@ -1,0 +1,70 @@
+---
+- name: Configure Nexus
+  hosts: localhost
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Wait for Nexus to start
+      wait_for:
+        host: localhost
+        port: 8081
+        timeout: 300
+
+    - name: Install Nexus API Python library
+      pip:
+        name: nexus3-cli
+
+    - name: Configure Nexus repositories
+      nexus3_repository:
+        url: http://localhost:8081
+        username: admin
+        password: admin123
+        repositories:
+          - name: maven-releases
+            type: hosted
+            format: maven2
+            online: true
+            storage:
+              blobStoreName: default
+              strictContentTypeValidation: true
+            cleanup:
+              policyNames:
+                - "weekly-cleanup"
+            writePolicy:
+              strictContentTypeValidation: true
+              writePolicy: ALLOW_WRITE_ONCE
+
+    - name: Configure Nexus user
+      nexus3_user:
+        url: http://localhost:8081
+        username: admin
+        password: admin123
+        state: present
+        name: ansible-user
+        password: ansible123
+        roles:
+          - nx-admin
+
+    - name: Configure Nexus anonymous access
+      nexus3_anonymous_access:
+        url: http://localhost:8081
+        username: admin
+        password: admin123
+        state: disabled
+
+    - name: Configure Nexus script
+      nexus3_script:
+        url: http://localhost:8081
+        username: admin
+        password: admin123
+        state: present
+        name: ansible-script
+        content: |
+          import org.sonatype.nexus.repository.storage.WritePolicy
+          repository.createMavenHosted('maven-snapshots', true, 
+WritePolicy.ALLOW)
+          repository.createMavenHosted('maven-thirdparty', true, 
+WritePolicy.ALLOW)
+      register: script_result
+
