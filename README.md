@@ -50,7 +50,7 @@ This may also be found at: /var/jenkins_home/secrets/initialAdminPassword
 1. Access Nexus:
 
    Open your web browser and visit [http://localhost:8081](http://localhost:8081). This will take you to the Nexus web interface.
-
+   
     ```
     /nexus-data/admin.password
     ```
@@ -96,3 +96,7 @@ The Docker Compose configuration consists of two services: Jenkins and Nexus. Ea
 - Both Jenkins and Nexus containers are set to automatically restart (`restart: always`) in case of any failures or system restarts.
 
 Feel free to modify the configurations as per your requirements. For more information and advanced usage of Docker Compose, refer to the official documentation.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
