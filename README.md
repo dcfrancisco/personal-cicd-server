@@ -2,8 +2,6 @@
 
 This repository contains a docker-compose file to create a CI/CD environment with Jenkins and Nexus using Docker Compose.
 
-This repository contains a Docker Compose configuration for setting up Jenkins and Nexus containers. It allows you to quickly spin up a local development environment with these CI/CD tools.
-
 ## Prerequisites
 
 Make sure you have Docker and Docker Compose installed on your machine before proceeding.
