@@ -35,6 +35,17 @@
               strictContentTypeValidation: true
               writePolicy: ALLOW_WRITE_ONCE
 
+          - name: docker-registry
+            type: hosted
+            format: docker
+            online: true
+            docker:
+              v1Enabled: false
+              forceBasicAuth: false
+              httpPort: 8082
+              httpsPort: 8083
+            strictContentTypeValidation: true
+
     - name: Configure Nexus user
       nexus3_user:
         url: http://localhost:8081
@@ -62,9 +73,6 @@
         name: ansible-script
         content: |
           import org.sonatype.nexus.repository.storage.WritePolicy
-          repository.createMavenHosted('maven-snapshots', true, 
-WritePolicy.ALLOW)
-          repository.createMavenHosted('maven-thirdparty', true, 
-WritePolicy.ALLOW)
+          repository.createMavenHosted('maven-snapshots', true, WritePolicy.ALLOW)
+          repository.createMavenHosted('maven-thirdparty', true, WritePolicy.ALLOW)
       register: script_result
-
