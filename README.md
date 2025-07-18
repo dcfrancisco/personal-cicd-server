@@ -3,7 +3,7 @@
 This repository contains a docker-compose file to create a CI/CD environment with Jenkins and Nexus using Docker Compose.
 
 
-> ☕️ If this helps you learn faster, [buy me a coffee](https://www.buymeacoffee.com/dcfrancisco) 🙌
+> ☕ Keep me caffeinated so I can keep debugging things you won’t have to — [buy me a coffee](https://www.buymeacoffee.com/dcfrancisco) 🙌
 
 
 
