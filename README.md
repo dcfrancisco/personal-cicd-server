@@ -1,6 +1,7 @@
-# CI/CD Environment with Jenkins and Nexus using Docker Compose
+````markdown
+# CI/CD Environment with Jenkins, Nexus, GitLab, and SonarQube using Docker Compose
 
-This repository contains a docker-compose file to create a CI/CD environment with Jenkins and Nexus using Docker Compose.
+This repository contains a docker-compose file to create a comprehensive CI/CD environment with Jenkins, Nexus, GitLab, and SonarQube using Docker Compose.
 
 
 > ☕ Keep me caffeinated so I can keep debugging things you won’t have to — [buy me a coffee](https://www.buymeacoffee.com/dcfrancisco) 🙌
@@ -17,59 +18,34 @@ Make sure you have Docker and Docker Compose installed on your machine before pr
 
 ## Usage
 
-1. Clone this repository to your local machine:
+### Quick Start (Fully Automated)
 
-   ```shell
-   git clone git@github.com:dcfrancisco/personal-cicd-server.git
-   ```
-
-2. Navigate to the cloned directory:
-
-   ```shell
-   cd personal-cicd-server
-   ```
-
-3. Start the containers using Docker Compose:
-
-   ```shell
-   docker-compose up -d
-   ```
-
-   This command will download the required Docker images and start the Jenkins and Nexus containers in the background.
-
-4. Access Jenkins:
-
-   Open your web browser and visit [http://localhost:8080](http://localhost:8080). This will take you to the Jenkins web interface.
-
-Initial setup is required to unlock Jenkins and install the recommended plugins. To do this, you need to retrieve the initial admin password from the Jenkins container. You can do this by running the following command:
+The easiest way to get everything running:
 
 ```shell
-docker exec jenkins-instance cat /var/jenkins_home/secrets/initialAdminPassword
+# Clone the repository
+git clone git@github.com:dcfrancisco/personal-cicd-server.git
+cd personal-cicd-server
+
+# Run the automated setup and start all services
+./start.sh
 ```
-or
 
-This may also be found at: /var/jenkins_home/secrets/initialAdminPassword
+This script will:
+- ✅ Create all necessary volume directories
+- ✅ Check Docker and Docker Compose installation
+- ✅ Build custom Docker images
+- ✅ Start all containers
+- ✅ Wait for services to be healthy
+- ✅ Display access information
 
-1. Access Nexus:
+### Manual Setup
 
-   Open your web browser and visit [http://localhost:8081](http://localhost:8081). This will take you to the Nexus web interface.
-   
-    ```
-    /nexus-data/admin.password
-    ```
-2. Perform any additional configurations or setups required for Jenkins and Nexus as per your needs.
-
-3. When you're finished, stop the containers using Docker Compose:
-
-   ```shell
-   docker-compose down
-   ```
-
-   This command will stop and remove the containers, but preserve the Jenkins data volume for future use.
+If you prefer to run commands manually:
 
 ## Configuration
 
-The Docker Compose configuration consists of two services: Jenkins and Nexus. Each service is defined with its own set of configurations.
+The Docker Compose configuration consists of four main services: Jenkins, Nexus, SonarQube, and GitLab. Each service is defined with its own set of configurations.
 
 ### Jenkins
 
@@ -79,6 +55,8 @@ The Docker Compose configuration consists of two services: Jenkins and Nexus. Ea
   - Jenkins web interface: 8080 (mapped to the host machine)
 - Volumes:
   - `jenkins-data`: Stores Jenkins configuration and data
+- Plugins included:
+  - Git, Workflow, Docker, Credentials, SonarQube, GitLab integration
 
 ### Nexus
 
@@ -90,9 +68,53 @@ The Docker Compose configuration consists of two services: Jenkins and Nexus. Ea
 - Volumes:
   - `./volume:/nexus-data`: Stores Nexus configuration and data
 
+### SonarQube
+
+- Docker image: Built using the `./sonarqube` context
+- Container name: `sonarqube-instance`
+- Port: 9000
+- Database: PostgreSQL (separate container)
+- Volumes:
+  - `sonarqube-data`: SonarQube data directory
+  - `sonarqube-logs`: SonarQube logs
+  - `sonarqube-extensions`: SonarQube extensions/plugins
+
+### PostgreSQL (for SonarQube)
+
+- Docker image: `postgres:15-alpine`
+- Container name: `postgres-instance`
+- Database credentials:
+  - Username: `sonarqube`
+  - Password: `sonarqube_password`
+  - Database: `sonarqube`
+- Volumes:
+  - `postgres-data`: PostgreSQL data directory
+
+### GitLab
+
+- Docker image: `gitlab/gitlab-ee:latest`
+- Container name: `gitlab-instance`
+- Ports:
+  - HTTP: 80
+  - SSH: 2222
+- Volumes:
+  - `gitlab-config`: GitLab configuration
+  - `gitlab-data`: GitLab data
+  - `gitlab-logs`: GitLab logs
+- Default credentials:
+  - Username: `root`
+  - Password: `gitlabadmin123`
+
 ## Volumes
 
-- `jenkins-data`: A named volume used by the Jenkins service to persist configuration and data. This volume is created automatically by Docker Compose.
+- `jenkins-data`: Jenkins configuration and data
+- `sonarqube-data`: SonarQube data
+- `sonarqube-logs`: SonarQube logs
+- `sonarqube-extensions`: SonarQube extensions
+- `postgres-data`: PostgreSQL data
+- `gitlab-config`: GitLab configuration
+- `gitlab-data`: GitLab data
+- `gitlab-logs`: GitLab logs
 
 ## Additional Information
 
@@ -100,6 +122,94 @@ The Docker Compose configuration consists of two services: Jenkins and Nexus. Ea
 
 Feel free to modify the configurations as per your requirements. For more information and advanced usage of Docker Compose, refer to the official documentation.
 
+## Helper Scripts
+
+The repository includes helper scripts to manage the CI/CD environment:
+
+### start.sh
+Complete automated setup and startup of all services.
+
+```shell
+./start.sh
+```
+
+### stop.sh
+Safely stop all running services while preserving data.
+
+```shell
+./stop.sh
+```
+
+### status.sh
+Check the status of all services and get diagnostic information.
+
+```shell
+./status.sh
+```
+
+### setup.sh
+Initialize volume directories and create configuration files.
+
+```shell
+./setup.sh
+```
+
+## Service Details & Access
+
+| Service | URL | Port | Credentials |
+|---------|-----|------|-------------|
+| **Jenkins** | http://localhost:8080 | 8080 | Retrieved from container |
+| **Nexus** | http://localhost:8081 | 8081 | Check admin.password file |
+| **SonarQube** | http://localhost:9000 | 9000 | admin / admin |
+| **GitLab** | http://localhost | 80 | root / gitlabadmin123 |
+| **GitLab SSH** | ssh://localhost:2222 | 2222 | root / gitlabadmin123 |
+| **PostgreSQL** | localhost | 5432 | sonarqube / sonarqube_password |
+
+## Data Persistence
+
+All data is persisted in the `./volume/` directory:
+
+```
+volume/
+├── jenkins/              # Jenkins home directory
+├── nexus/                # Nexus repository data
+├── sonarqube/
+│   ├── data/             # SonarQube data
+│   ├── logs/             # SonarQube logs
+│   └── extensions/       # SonarQube plugins
+├── postgres/             # PostgreSQL database
+└── gitlab/
+    ├── config/           # GitLab configuration
+    ├── data/             # GitLab data
+    └── logs/             # GitLab logs
+```
+
+Data is preserved even when containers are stopped or removed.
+
+## Troubleshooting
+
+### Services won't start
+- Ensure Docker and Docker Compose are installed
+- Check available disk space
+- Try rebuilding images: `docker-compose build --no-cache`
+
+### Can't access a service
+- Wait a few minutes for GitLab to start (it takes time)
+- Check service logs: `docker-compose logs -f [service-name]`
+- Verify ports aren't already in use on your system
+
+### Database connection issues
+- PostgreSQL must be running before SonarQube
+- Check that credentials in docker-compose.yml match
+
+### Reset everything
+```shell
+docker-compose down -v
+rm -rf volume/
+./start.sh
+```
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+````

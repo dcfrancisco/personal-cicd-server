@@ -4,3 +4,5 @@ docker-workflow
 credentials-binding
 ansicolor
 ws-cleanup
+gitlab-plugin
+sonar
