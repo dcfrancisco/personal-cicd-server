@@ -1,15 +1,20 @@
 version: "3.9"
 services:
-  jenkins:
-    build:
-      context: ./jenkins
-    container_name: jenkins-instance
-    ports:
-      - "8080:8080"
+  # GitLab Runner - Primary CI/CD executor (runner-only, connects to gitlab.com or your GitLab instance)
+  gitlab-runner:
+    image: gitlab/gitlab-runner:alpine
+    container_name: gitlab-runner
+    restart: unless-stopped
     volumes:
-      - jenkins-data:/var/jenkins_home
-    restart: always
-   
+      # Mount Docker socket to enable docker executor (jobs run on host Docker engine)
+      # WARNING: This grants the runner significant host access. Use only in trusted environments.
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Persist runner configuration (registration info, etc.)
+      - gitlab-runner-config:/etc/gitlab-runner
+    # Note: Runner must be registered interactively after first start.
+    # See README for registration commands.
+
+  # Nexus Repository Manager - Artifact storage (Maven, npm, Docker registry, etc.)
   nexus:
     build:
       context: ./nexus
@@ -19,12 +24,12 @@ services:
       - 8082
       - 8083
     ports:
-      - "8082:8082"
-      - "8083:8083"
-      - "8081:8081"
+      - "8081:8081"  # Nexus UI
+      - "8082:8082"  # Docker registry (hosted)
+      - "8083:8083"  # Docker registry (group)
     volumes:
       - ./volume:/nexus-data
     restart: always
 
 volumes:
-  jenkins-data:
+  gitlab-runner-config:
